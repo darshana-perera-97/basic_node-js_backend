@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Books</title>
+</head>
+<body>
+  <h1>Books from API 1</h1>
+  <ul id="books1"></ul>
+
+  <h1>Books from API 2</h1>
+  <ul id="books2"></ul>
+
+  <script>
+    async function fetchBooks1() {
+      const response = await fetch('https://basic-node-js-backend.onrender.com/api');
+      const data = await response.json();
+      const books1Container = document.getElementById('books1');
+
+      data.forEach(book => {
+        const li = document.createElement('li');
+        li.textContent = `${book.title} by ${book.author}`;
+        books1Container.appendChild(li);
+      });
+    }
+
+    async function fetchBooks2() {
+      const response = await fetch('https://basic-node-js-backend.onrender.com');
+      const data = await response.json();
+      const books2Container = document.getElementById('books2');
+
+      data.forEach(book => {
+        const li = document.createElement('li');
+        li.textContent = `${book.title} by ${book.author}`;
+        books2Container.appendChild(li);
+      });
+    }
+
+    fetchBooks1();
+    fetchBooks2();
+  </script>
+</body>
+</html>

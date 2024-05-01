@@ -24,14 +24,7 @@ app.get("/", (req, res) => {
   res.json(books2);
 });
 
-app.get("/api/books/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  const book = books.find((book) => book.id === id);
-  if (!book) {
-    return res.status(404).json({ message: "Book not found" });
-  }
-  res.json(book);
-});
+
 
 // Start the server
 app.listen(PORT, () => {
