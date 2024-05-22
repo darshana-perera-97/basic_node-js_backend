@@ -57,6 +57,7 @@ app.use(connectMongoDB);
 // Function to fetch data from Firebase and store it in MongoDB
 let previousDeviceTime = null; // Store the previous device time
 let state = false; // Store the previous device time
+const LastData = []; // Array to store the last 10 documents
 
 async function fetchDataAndUpdateMongoDB() {
   try {
@@ -89,7 +90,7 @@ async function fetchDataAndUpdateMongoDB() {
     // Specify the new database and collection
     const mongoDatabase = client.db("nDB"); // Use 'newDB' instead of 'sampleDB'
     const collection = mongoDatabase.collection("sampleCollection");
-    state=true;
+    state = true;
 
     // Construct the document to be inserted
     const document = {
@@ -97,17 +98,26 @@ async function fetchDataAndUpdateMongoDB() {
       state,
       timestamp: currentDateTime,
     };
+    console.log(LastData);
 
     // Insert the document into the collection
     const result = await collection.insertOne(document);
     console.log(`Inserted document with _id: ${result.insertedId}`);
+
+    // Push the document into LastData array
+    LastData.push(document);
+
+    // If LastData has more than 10 documents, remove the oldest one
+    if (LastData.length > 10) {
+      LastData.shift(); // Remove the oldest document
+    }
   } catch (error) {
     console.error("Error fetching data or storing to MongoDB:", error);
   }
 }
 
 // Schedule fetchDataAndUpdateMongoDB to run every 30 seconds
-setInterval(fetchDataAndUpdateMongoDB, 120000);
+setInterval(fetchDataAndUpdateMongoDB, 30000);
 
 // Route to fetch data from Firebase and store it in MongoDB
 app.get("/data", async (req, res) => {
@@ -170,6 +180,37 @@ app.get("/fetch-data", async (req, res) => {
 
     // Send the retrieved documents as the response
     res.json(documents);
+  } catch (error) {
+    console.error("Error fetching data from MongoDB:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+app.get("/history", async (req, res) => {
+  res.json(LastData);
+});
+
+// New route to retrieve the latest 20 documents from MongoDB
+app.get("/last", async (req, res) => {
+  try {
+    // Specify the new database and collection
+    const mongoDatabase = req.mongoClient.db("nDB");
+    const collection = mongoDatabase.collection("sampleCollection");
+
+    // Retrieve the latest 20 documents, sorted by timestamp in descending order
+    const documents = await collection
+      .find({})
+      .sort({ timestamp: -1 })
+      .limit(10)
+      .toArray();
+
+    if (documents.length === 0) {
+      res.status(404).json({ error: "No data found in the database" });
+      return;
+    }
+
+    // Send the retrieved documents as the response
+    res.json(documents);
+    console.error(documents[9].timestamp);
   } catch (error) {
     console.error("Error fetching data from MongoDB:", error);
     res.status(500).json({ error: "Internal Server Error" });
