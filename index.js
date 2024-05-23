@@ -57,7 +57,10 @@ app.use(connectMongoDB);
 // Function to fetch data from Firebase and store it in MongoDB
 let previousDeviceTime = null; // Store the previous device time
 let state = false; // Store the previous device time
-const LastData = []; // Array to store the last 10 documents
+const LastData1 = []; // Array to store the last 10 documents
+const LastData2 = []; // Array to store the last 30 documents
+const LastData3 = []; // Array to store the last 60 documents
+const LastData4 = []; // Array to store the last 120 documents
 
 async function fetchDataAndUpdateMongoDB() {
   try {
@@ -98,18 +101,30 @@ async function fetchDataAndUpdateMongoDB() {
       state,
       timestamp: currentDateTime,
     };
-    console.log(LastData);
+    console.log(LastData1);
 
     // Insert the document into the collection
     const result = await collection.insertOne(document);
     console.log(`Inserted document with _id: ${result.insertedId}`);
 
-    // Push the document into LastData array
-    LastData.push(document);
+    // Push the document into LastData1 array
+    LastData1.push(document);
+    LastData2.push(document);
+    LastData3.push(document);
+    LastData4.push(document);
 
-    // If LastData has more than 10 documents, remove the oldest one
-    if (LastData.length > 10) {
-      LastData.shift(); // Remove the oldest document
+    // If LastData1 has more than 10 documents, remove the oldest one
+    if (LastData1.length > 10) {
+      LastData1.shift(); // Remove the oldest document
+    }
+    if (LastData2.length > 30) {
+      LastData2.shift(); // Remove the oldest document
+    }
+    if (LastData3.length > 60) {
+      LastData3.shift(); // Remove the oldest document
+    }
+    if (LastData4.length > 120) {
+      LastData4.shift(); // Remove the oldest document
     }
   } catch (error) {
     console.error("Error fetching data or storing to MongoDB:", error);
@@ -185,8 +200,21 @@ app.get("/fetch-data", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-app.get("/history", async (req, res) => {
-  res.json(LastData);
+app.get("/history1", async (req, res) => {
+  res.json(LastData1);
+  console.log(LastData1.length);
+});
+app.get("/history2", async (req, res) => {
+  res.json(LastData2);
+  console.log(LastData2.length);
+});
+app.get("/history3", async (req, res) => {
+  res.json(LastData3);
+  console.log(LastData3.length);
+});
+app.get("/history4", async (req, res) => {
+  res.json(LastData4);
+  console.log(LastData4.length);
 });
 
 // New route to retrieve the latest 20 documents from MongoDB
