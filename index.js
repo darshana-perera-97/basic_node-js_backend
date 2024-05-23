@@ -132,7 +132,7 @@ async function fetchDataAndUpdateMongoDB() {
 }
 
 // Schedule fetchDataAndUpdateMongoDB to run every 30 seconds
-setInterval(fetchDataAndUpdateMongoDB, 30000);
+setInterval(fetchDataAndUpdateMongoDB, 3000);
 
 // Route to fetch data from Firebase and store it in MongoDB
 app.get("/data", async (req, res) => {
