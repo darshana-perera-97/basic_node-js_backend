@@ -76,7 +76,7 @@ async function fetchDataAndUpdateMongoDB() {
 
     // Get the value from the snapshot
     const data = snapshot.val();
-    let currentDeviceTime = data.device1.time;
+    let currentDeviceTime = data.device1.state;
     console.log(currentDeviceTime);
     if (currentDeviceTime === previousDeviceTime) {
       state = false;
