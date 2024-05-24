@@ -89,8 +89,7 @@ async function fetchDataAndUpdateMongoDB() {
       alarm: false,
     }; // Define your mock data
     if (
-      data.device1.temperatureCelsius > 35.0 ||
-      data.device1.doorStatus === true
+      data.device1.temperatureCelsius > 35.0
     ) {
       var mockData = {
         alarm: true,
