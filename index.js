@@ -1,6 +1,6 @@
 const express = require("express");
 const { initializeApp } = require("firebase/app");
-const { getDatabase, ref, get } = require("firebase/database");
+const { getDatabase, ref, get, set } = require("firebase/database");
 const moment = require("moment-timezone");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
@@ -83,16 +83,6 @@ async function fetchDataAndUpdateMongoDB() {
       console.log("device offline");
       return;
     }
-    
-    // Get the value from the snapshot
-    const data = snapshot.val();
-    let currentDeviceTime = data.device1.state;
-    console.log(currentDeviceTime);
-    if (currentDeviceTime === previousDeviceTime) {
-      state = false;
-      console.log("device offline");
-      return;
-    }
     // Send mock data to Firebase
     const mockPath = "alarm"; // Define your mock path
     var mockData = {
@@ -148,10 +138,10 @@ async function fetchDataAndUpdateMongoDB() {
     if (LastData2.length > 30) {
       LastData2.shift(); // Remove the oldest document
     }
-    if (LastData3.length > 600) {
+    if (LastData3.length > 60) {
       LastData3.shift(); // Remove the oldest document
     }
-    if (LastData4.length > 600) {
+    if (LastData4.length > 150) {
       LastData4.shift(); // Remove the oldest document
     }
   } catch (error) {
@@ -160,18 +150,19 @@ async function fetchDataAndUpdateMongoDB() {
 }
 
 // Schedule fetchDataAndUpdateMongoDB to run every 30 seconds
-setInterval(fetchDataAndUpdateMongoDB, 3000);
+setInterval(fetchDataAndUpdateMongoDB, 30000);
 
 // Route to fetch data from Firebase and store it in MongoDB
 app.get("/data", async (req, res) => {
   try {
     await fetchDataAndUpdateMongoDB();
-    // res.status(200).json({ message: "Data fetched and stored successfully" });
-    const currentDateTime = moment().tz("Asia/Colombo").format();
+    res.status(200).json({ message: "Data fetched and stored successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// Route to fetch data from Firebase without storing it in MongoDB
 app.get("/data2", async (req, res) => {
   try {
     // Reference to the root of the database
@@ -228,6 +219,8 @@ app.get("/fetch-data", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// Routes to retrieve historical data
 app.get("/history1", async (req, res) => {
   res.json(LastData1);
   console.log(LastData1.length);
@@ -256,7 +249,7 @@ app.get("/last", async (req, res) => {
     const documents = await collection
       .find({})
       .sort({ timestamp: -1 })
-      .limit(10)
+      .limit(20)
       .toArray();
 
     if (documents.length === 0) {
@@ -266,7 +259,6 @@ app.get("/last", async (req, res) => {
 
     // Send the retrieved documents as the response
     res.json(documents);
-    console.error(documents[9].timestamp);
   } catch (error) {
     console.error("Error fetching data from MongoDB:", error);
     res.status(500).json({ error: "Internal Server Error" });
