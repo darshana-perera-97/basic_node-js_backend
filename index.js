@@ -83,6 +83,34 @@ async function fetchDataAndUpdateMongoDB() {
       console.log("device offline");
       return;
     }
+    
+    // Get the value from the snapshot
+    const data = snapshot.val();
+    let currentDeviceTime = data.device1.state;
+    console.log(currentDeviceTime);
+    if (currentDeviceTime === previousDeviceTime) {
+      state = false;
+      console.log("device offline");
+      return;
+    }
+    // Send mock data to Firebase
+    const mockPath = "alarm"; // Define your mock path
+    var mockData = {
+      alarm: false,
+    }; // Define your mock data
+    if (
+      data.device1.temperatureCelsius > 35.0 ||
+      data.device1.doorStatus === true
+    ) {
+      var mockData = {
+        alarm: true,
+      }; // Define your mock data
+    } else {
+      var mockData = {
+        alarm: false,
+      }; // Define your mock data
+    }
+    await set(ref(database, mockPath), mockData); // Send mock data to Firebase
 
     // Update the previous device time
     previousDeviceTime = currentDeviceTime;
