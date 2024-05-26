@@ -131,16 +131,16 @@ async function fetchDataAndUpdateMongoDB() {
     LastData4.push(document);
 
     // If LastData1 has more than 10 documents, remove the oldest one
-    if (LastData1.length > 10) {
+    if (LastData1.length > 600) {
       LastData1.shift(); // Remove the oldest document
     }
-    if (LastData2.length > 30) {
+    if (LastData2.length > 600) {
       LastData2.shift(); // Remove the oldest document
     }
-    if (LastData3.length > 60) {
+    if (LastData3.length > 600) {
       LastData3.shift(); // Remove the oldest document
     }
-    if (LastData4.length > 150) {
+    if (LastData4.length > 600) {
       LastData4.shift(); // Remove the oldest document
     }
   } catch (error) {
