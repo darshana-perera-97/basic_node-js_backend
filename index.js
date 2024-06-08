@@ -21,6 +21,13 @@ const database = getDatabase(firebaseApp);
 
 const app = express();
 
+let alerts = [];
+let tdoor = "";
+let ttemp = "";
+let tgrid = "";
+let tgas = "";
+let tmotion = "";
+
 app.use(cors()); // Enable CORS
 
 // MongoDB URI
@@ -88,9 +95,7 @@ async function fetchDataAndUpdateMongoDB() {
     var mockData = {
       alarm: false,
     }; // Define your mock data
-    if (
-      data.device1.temperatureCelsius > 40.0
-    ) {
+    if (data.device1.temperatureCelsius > 40.0) {
       var mockData = {
         alarm: true,
       }; // Define your mock data
@@ -119,7 +124,45 @@ async function fetchDataAndUpdateMongoDB() {
       timestamp: currentDateTime,
     };
     console.log(LastData1);
-
+    if (tdoor !== data.device1.doorStatus) {
+      // console.log("first");
+      tdoor = data.device1.doorStatus;
+      let tmp = {
+        item: "door",
+        state: data.device1.doorStatus,
+        time: currentDateTime,
+      };
+      alerts.push(tmp);
+    }
+    if (tmotion !== data.device1.moction) {
+      // console.log("first");
+      tmotion = data.device1.moction;
+      let tmp = {
+        item: "move",
+        state: data.device1.moction,
+        time: currentDateTime,
+      };
+      alerts.push(tmp);
+    }
+    if (tgas !== data.device1.gasStatus) {
+      tgas = data.device1.gasStatus;
+      let tmp = {
+        item: "gas",
+        state: data.device1.gasStatus,
+        time: currentDateTime,
+      };
+      alerts.push(tmp);
+    }
+    if (tgrid !== data.device1.gridStatus) {
+      // console.log("first");
+      tgrid = data.device1.gridStatus;
+      let tmp = {
+        item: "grid",
+        state: data.device1.gridStatus,
+        time: currentDateTime,
+      };
+      alerts.push(tmp);
+    }
     // Insert the document into the collection
     const result = await collection.insertOne(document);
     console.log(`Inserted document with _id: ${result.insertedId}`);
@@ -236,6 +279,9 @@ app.get("/history4", async (req, res) => {
   res.json(LastData4);
   console.log(LastData4.length);
 });
+app.get("/alerts", async (req, res) => {
+  res.json(alerts);
+});
 
 // New route to retrieve the latest 20 documents from MongoDB
 app.get("/last", async (req, res) => {
@@ -262,6 +308,12 @@ app.get("/last", async (req, res) => {
     console.error("Error fetching data from MongoDB:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+// Route to reset alerts
+app.get("/resetAllert", (req, res) => {
+  alerts = [];
+  res.status(200).json({ message: "Alerts reset successfully" });
 });
 
 // Start the server
